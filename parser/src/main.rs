@@ -3,6 +3,8 @@ mod types;
 
 use structopt::StructOpt;
 
+use database::models::{NewWord, NewWordEntry};
+
 #[derive(StructOpt)]
 #[structopt(
     name = "dict-parser",
@@ -17,6 +19,7 @@ struct Opts {
 
 fn main() {
     let opt = Opts::from_args();
+
     match std::fs::read_to_string(opt.in_file) {
         Ok(s) => {
             let result = cedict_parser::parse_cedict(&s);
