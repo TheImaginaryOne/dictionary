@@ -1,3 +1,6 @@
 [workspace]
 
 members = ["parser", "database"]
+
+[replace]
+"diesel_derives:1.4.1" = { git = "https://github.com/diesel-rs/diesel", branch = "master" }
