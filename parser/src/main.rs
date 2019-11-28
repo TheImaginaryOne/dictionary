@@ -10,8 +10,6 @@ use database::diesel::connection::Connection; // so we can do transactions
 use database::diesel::result::Error as DieselError;
 use database::diesel::prelude::*;
 
-use itertools::Itertools;
-
 #[derive(Debug)]
 enum ParserError {
     FileError,
@@ -50,7 +48,7 @@ fn parse() -> Result<(), ParserError> {
     for entry in &mut result.1 {
         entry.dictionary_id = opt.dictionary_id;
     }
-    insert_entries(&result.1, &pool.get().unwrap(), opt.dictionary_id)?;
+    insert_entries(&result.1, &pool.get_connection(), opt.dictionary_id)?;
 
     Ok(())
 }
@@ -79,37 +77,18 @@ fn insert_entries(entries: &Vec<Entry>, connection: &DbConnection, dict_id: i32)
                 data.push((entry.traditional.clone(), entry.simplified.clone(), dict_id, entry.definition.clone(), 0, entry.pinyin.clone()));
             }
         }
-        let chunk_len = 10000;
-        let mut x = 0;
-        let entries_len = data.len();
-        // batch insert
-        for chunk in &data.into_iter().chunks(chunk_len) {
-            let current_chunk_len = if entries_len < chunk_len * (x + 1) {
-                entries_len - chunk_len * x
-            } else {
-                chunk_len
-            };
-            x += 1;
 
-            let mut insert = "insert into temp_data values ".to_string();
-            for i in 0..current_chunk_len {
-                let a = i * 6;
-                // oof
-                insert.push_str(&format!("(${},${},${},${},${},${}),",a+1,a+2,a+3,a+4,a+5,a+6));
-            }
-            insert.pop(); // remove trailing comma
-
-            let mut q = diesel::sql_query(insert).into_boxed::<diesel::pg::Pg>();
-            for record in chunk {
-                q = q.bind::<Text, _>(record.0)
-                    .bind::<Text, _>(record.1)
-                    .bind::<Integer, _>(record.2)
-                    .bind::<Text, _>(record.3)
-                    .bind::<Integer, _>(record.4)
-                    .bind::<Text, _>(record.5);
-            }
-            q.execute(connection)?;
+        let insert = "insert into temp_data values (?,?,?,?,?,?)".to_string();
+        for record in &data {
+            diesel::sql_query(&insert).bind::<Text, _>(&record.0)
+                .bind::<Text, _>(&record.1)
+                .bind::<Integer, _>(record.2)
+                .bind::<Text, _>(&record.3)
+                .bind::<Integer, _>(record.4)
+                .bind::<Text, _>(&record.5)
+                .execute(connection)?;
         }
+
         println!("Moving data from temporary table to main tables");
         connection.batch_execute(include_str!("scripts/move_temp_data.sql"))?;
         Ok(())

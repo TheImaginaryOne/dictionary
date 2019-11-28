@@ -1,6 +1,6 @@
 table! {
     word (word_id) {
-        word_id -> Int4,
+        word_id -> Integer,
         traditional -> Text,
         simplified -> Text,
     }
@@ -8,19 +8,19 @@ table! {
 
 table! {
     word_entry (entry_id) {
-        entry_id -> Int4,
-        word_id -> Int4,
-        dictionary_id -> Int4,
+        entry_id -> Integer,
+        word_id -> Integer,
+        dictionary_id -> Integer,
         definitions -> Text,
     }
 }
 
 table! {
     word_pronunciation (pronunciation_id) {
-        pronunciation_id -> Int4,
-        pronunciation_type -> Int4,
+        pronunciation_id -> Integer,
+        pronunciation_type -> Integer,
         pronunciation -> Text,
-        entry_id -> Int4,
+        entry_id -> Integer,
     }
 }
 

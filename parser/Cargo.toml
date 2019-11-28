@@ -9,7 +9,6 @@ edition = "2018"
 [dependencies]
 nom = "5.0"
 structopt = "0.3"
-itertools = "0.8"
 dotenv = "0.15.0" # should sync with database crate
 
 [dependencies.database]

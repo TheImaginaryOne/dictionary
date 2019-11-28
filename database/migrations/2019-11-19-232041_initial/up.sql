@@ -1,12 +1,12 @@
 create table word(
-    word_id serial primary key not null,
+    word_id integer primary key not null,
     traditional text not null,
     simplified text not null,
     unique(traditional, simplified)
 );
 
 create table word_entry(
-    entry_id serial primary key not null,
+    entry_id integer primary key not null,
     word_id integer not null,
     dictionary_id integer not null,
     definitions text not null,
@@ -15,7 +15,7 @@ create table word_entry(
 );
 
 create table word_pronunciation(
-    pronunciation_id serial primary key not null,
+    pronunciation_id integer primary key not null,
     pronunciation_type integer not null,
     pronunciation text not null,
     entry_id integer not null,
