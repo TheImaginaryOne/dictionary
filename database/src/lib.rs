@@ -10,6 +10,7 @@ use diesel::connection::SimpleConnection;
 
 pub mod schema;
 pub mod models;
+pub mod search;
 
 pub fn create_db_pool() -> ConnectionPool {
     dotenv().ok();
@@ -19,6 +20,8 @@ pub fn create_db_pool() -> ConnectionPool {
 }
 
 pub type DbConnection = SqliteConnection;
+
+#[derive(Clone)]
 pub struct ConnectionPool(Pool<ConnectionManager<DbConnection>>);
 impl ConnectionPool {
     pub fn get_connection(&self) -> PooledConnection<ConnectionManager<DbConnection>> {

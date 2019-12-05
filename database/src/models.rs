@@ -28,7 +28,7 @@ pub struct NewWordEntry {
     pub definitions: String,
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Debug)]
 pub struct WordPronunciation {
     pub pronunciation_id: i32,
     pub pronunciation_type: i32,
