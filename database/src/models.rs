@@ -1,6 +1,8 @@
 use super::schema::{word, word_entry, word_pronunciation};
 
-#[derive(Queryable)]
+#[derive(Queryable, Identifiable)]
+#[table_name = "word"]
+#[primary_key(word_id)]
 pub struct Word {
     pub word_id: i32,
     pub traditional: String,
@@ -12,7 +14,10 @@ pub struct NewWord {
     pub traditional: String,
     pub simplified: String,
 }
-#[derive(Queryable)]
+#[derive(Queryable, Associations, Identifiable)]
+#[belongs_to(Word)]
+#[table_name = "word_entry"]
+#[primary_key(entry_id)]
 pub struct WordEntry {
     pub entry_id: i32,
     pub word_id: i32,
@@ -28,7 +33,10 @@ pub struct NewWordEntry {
     pub definitions: String,
 }
 
-#[derive(Queryable, Debug)]
+#[derive(Queryable, Debug, Associations, Identifiable)]
+#[belongs_to(WordEntry, foreign_key = "entry_id")]
+#[table_name = "word_pronunciation"]
+#[primary_key(pronunciation_id)]
 pub struct WordPronunciation {
     pub pronunciation_id: i32,
     pub pronunciation_type: i32,
