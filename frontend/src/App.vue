@@ -54,12 +54,12 @@ interface SearchError {
 
 type SearchResult = SearchOk | SearchError;
 
-async function getResults (query: string): Promise<SearchResult> {
+async function getResults (query: string, searchType: string): Promise<SearchResult> {
   try {
     if (query === '') {
       return { t: 'err', error: SearchErrorType.EmptyQuery }
     }
-    const response = await fetch('/api/search/jyutping/' + encodeURIComponent(query))
+    const response = await fetch(`/api/search/${searchType}/${encodeURIComponent(query)}`)
     const data = await response.json()
     if (data.message) {
       return { t: 'err', error: SearchErrorType.InvalidQuery }
@@ -87,8 +87,8 @@ export default Vue.extend({
   },
   methods: {
     // called when SearchForm emits a update:query event
-    updateQuery: async function (query: string) {
-      this.result = await getResults(query)
+    updateQuery: async function (query: string, searchType: string /** todo */) {
+      this.result = await getResults(query, searchType)
     }
   }
 })

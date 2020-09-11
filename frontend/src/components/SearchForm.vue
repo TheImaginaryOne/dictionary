@@ -1,7 +1,7 @@
 <template>
   <div class="search-form">
     <div class="nav-item">
-      <select class="nav-select">
+      <select class="nav-select" v-model="searchType">
         <option value="jyutping">Jyutping (Cantonese)</option>
         <option value="pinyin">Pinyin (Mandarin)</option>
         <option value="characters">Characters</option>
@@ -20,19 +20,23 @@ import Vue from 'vue'
 export default Vue.extend({
   data: function () {
     return {
-      query: ''
+      query: '',
+      searchType: 'jyutping'
     }
   },
   watch: {
-    // when query is updated
+    // when query is updated, run the function
     query: function () {
+      this.updateQuery()
+    },
+    searchType: function () {
       this.updateQuery()
     }
   },
   methods: {
     updateQuery: function () {
       // emit event
-      this.$emit('update:query', this.query)
+      this.$emit('update:query', this.query, this.searchType)
     }
   }
 })

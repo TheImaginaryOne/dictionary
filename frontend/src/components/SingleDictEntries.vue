@@ -19,8 +19,8 @@
 <script lang="ts">
 import Vue from 'vue'
 
-const a: { [key: string]: string; } = { '0': 'CC-CEDICT', '1': 'CC-Canto' }
-const b: { [key: string]: string; } = { '0': '國', '1': '粵' }
+const a: { [key: string]: string; } = { 0: 'CC-CEDICT', 1: 'CC-Canto' }
+const b: { [key: string]: string; } = { 0: '國', 1: '粵' }
 
 export default Vue.extend({
   props: {
