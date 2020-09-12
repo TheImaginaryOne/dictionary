@@ -1,23 +1,23 @@
 <template>
   <div class="word-entries">
     <div class="word-entries-characters">{{ wordEntries.traditional }} ({{ wordEntries.simplified }})</div>
-    <SingleDictEntries v-for="(entries, dictId) in wordEntries.entries"
+<!--    <SingleDictEntries v-for="(entries, dictId) in wordEntries.entries"
       :key="dictId"
       :dictionaryId="dictId"
-      :entries="entries"/>
+      :entries="entries"/>-->
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import SingleDictEntries from './SingleDictEntries.vue'
+// import SingleDictEntries from './SingleDictEntries.vue'
 
 export default Vue.extend({
   props: {
     wordEntries: Object
   },
   components: {
-    SingleDictEntries
+  //  SingleDictEntries
   }
 })
 </script>

@@ -2,31 +2,46 @@
   <div id="app">
     <div class="header-container">
       <div class="full-width header">
-        <div class="title">粵語詞典 Cantonese Dictionary</div>
-        <SearchForm @update:query="updateQuery"/>
+        <div class="title">
+          粵語詞典 Cantonese Dictionary
+        </div>
+        <SearchForm @update:query="updateQuery" />
       </div>
     </div>
     <div class="full-width">
-      <div v-if="result.t === 'err'" class="info-container">
-        <div v-if="result.error === 0" class="search-error">
-          Your search query is invalid.
+      <div class="sidebar">
+        <div v-if="result.t === 'err'"
+          class="info-container">
+          <div v-if="result.error === 0"
+            class="search-error">
+            Your search query is invalid.
+          </div>
+          <div v-if="result.error === 1"
+            class="search-error">
+            There seems to be a network error.
+          </div>
+          <div v-if="result.error === 2"
+            class="search-error">
+            Aiya! We have no results.
+          </div>
+          <div>
+            <p><b>Tips on how to search:</b></p>
+            <ul>
+              <li>
+                Space between syllables (nei hou, not neihou)
+              </li>
+              <li>
+                ? to match a single syllable or character
+              </li>
+            </ul>
+          </div>
         </div>
-        <div v-if="result.error === 1" class="search-error">
-          There seems to be a network error.
-        </div>
-        <div v-if="result.error === 2" class="search-error">
-          Aiya! We have no results.
-        </div>
-        <div>
-          <p><b>Tips on how to search:</b></p>
-          <ul>
-            <li>Space between syllables (nei hou, not neihou)</li>
-            <li>? to match a single syllable or character</li>
-          </ul>
+        <div v-if="result.t === 'ok'">
+          <WordEntries v-for="word in result.inner" :key="word.id" :word-entries="word"/>
         </div>
       </div>
-      <div v-if="result.t === 'ok'">
-        <WordEntries v-for="word in result.inner" :key="word.id" :word-entries="word"/>
+      <div class = "main-entry">
+        TODO
       </div>
     </div>
   </div>
@@ -36,13 +51,12 @@
 import Vue from 'vue'
 import SearchForm from './components/SearchForm.vue'
 import WordEntries from './components/WordEntries.vue'
-
 enum SearchErrorType {
   InvalidQuery,
   NetworkError,
   NoResults,
   EmptyQuery,
-};
+}
 interface SearchOk {
   t: 'ok';
   inner: never[];
