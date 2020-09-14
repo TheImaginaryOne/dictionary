@@ -120,6 +120,19 @@ export default Vue.extend({
 
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css?family=Fira+Sans:400,500,700&display=swap');
+$header-height: 60px;
+body, html {
+  margin: 0;
+  height: 100%;
+}
+#app {
+  height: 100%;
+  background-color: #eee;
+}
+.header-container {
+  background-color: #6f8996;
+  height: $header-height;
+}
 .full-width {
   font-family: 'Fira Sans', sans-serif;
   width: 100%;
@@ -127,19 +140,20 @@ export default Vue.extend({
   margin: 0 auto;
   line-height: 1.5;
   display: flex;
+
+  height: calc(100% - #{$header-height});
 }
-body {
-  margin: 0;
-}
-.header-container {
-  background-color: #6f8996;
-}
+
 .sidebar {
   flex-basis: 300px;
-  padding-right: 16px;
+  height: auto;
+  overflow-y: scroll;
+  background-color: #fff;
 }
 .main-entries {
-
+  width: 100%;
+  padding-left: 16px;
+  background-color: #fff;
 }
 .word-entries-characters {
   font-size: 1.75rem;

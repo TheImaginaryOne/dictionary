@@ -26,7 +26,8 @@
         </ul>
       </div>
     </div>
-    <div v-if="results.t === 'ok'">
+    <div v-if="results.t === 'ok'"
+      class="word-list">
       <WordEntryPreview
         v-for="word in results.inner"
         :key="word.id"
