@@ -1,23 +1,21 @@
 <template>
-  <div class="word-entry-preview">
-    <div class="word-entry-preview-characters">{{ wordEntries.traditional }} ({{ wordEntries.simplified }})</div>
-<!--    <SingleDictEntries v-for="(entries, dictId) in wordEntries.entries"
-      :key="dictId"
-      :dictionaryId="dictId"
-      :entries="entries"/>-->
+  <div class="word-entry-preview"
+    @click="onClick">
+    <div class="word-entry-preview-characters">{{ wordEntry.traditional }} ({{ wordEntry.simplified }})</div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-// import SingleDictEntries from './SingleDictEntries.vue'
 
 export default Vue.extend({
   props: {
-    wordEntries: Object
+    wordEntry: Object
   },
-  components: {
-  //  SingleDictEntries
+  methods: {
+    onClick: function () {
+      this.$emit('click', this.wordEntry.word_id)
+    }
   }
 })
 </script>
@@ -30,5 +28,9 @@ export default Vue.extend({
 .word-entry-preview {
   border-bottom: 1px solid #bbb;
   padding: 0.5rem 0.5rem;
+  &:hover {
+    background-color: #eee;
+    cursor: pointer;
+  }
 }
 </style>

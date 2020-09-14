@@ -1,5 +1,7 @@
 use super::schema::{word, word_entry, word_pronunciation};
+use serde::Serialize;
 
+#[derive(Serialize)]
 #[derive(Queryable, Identifiable)]
 #[table_name = "word"]
 #[primary_key(word_id)]

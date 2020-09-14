@@ -10,43 +10,17 @@
     </div>
     <div class="full-width">
       <div class="sidebar">
-        <div v-if="result.t === 'err'"
-          class="info-container">
-          <div v-if="result.error === 0"
-            class="search-error">
-            Your search query is invalid.
-          </div>
-          <div v-if="result.error === 1"
-            class="search-error">
-            There seems to be a network error.
-          </div>
-          <div v-if="result.error === 2"
-            class="search-error">
-            Aiya! We have no results.
-          </div>
-          <div>
-            <p><b>Tips on how to search:</b></p>
-            <ul>
-              <li>
-                Space between syllables (nei hou, not neihou)
-              </li>
-              <li>
-                ? to match a single syllable or character
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div v-if="result.t === 'ok'">
-          <WordEntryPreview v-for="word in result.inner" :key="word.id" :word-entries="word"/>
-        </div>
+        <Sidebar
+          :results="results"
+          @click="updateWordEntry" />
       </div>
       <div class="main-entries">
-        <div v-if="wordEntries !== null">
-          <div class="word-entries-characters">{{ wordEntries.traditional }} ({{ wordEntries.simplified }})</div>
-          <SingleDictEntries v-for="(entries, dictId) in wordEntries.entries"
+        <div v-if="wordEntries.t === 'ok'">
+          <div class="word-entries-characters">{{ wordEntries.inner.traditional }} ({{ wordEntries.inner.simplified }})</div>
+          <SingleDictEntries v-for="(entries, dictId) in wordEntries.inner.entries"
             :key="dictId"
             :dictionaryId="dictId"
-            :entries="entries"/>
+            :entries="entries" />
         </div>
       </div>
     </div>
@@ -56,8 +30,9 @@
 <script lang="ts">
 import Vue from 'vue'
 import SearchForm from './components/SearchForm.vue'
-import WordEntryPreview from './components/WordEntryPreview.vue'
 import SingleDictEntries from './components/SingleDictEntries.vue'
+import Sidebar from './components/Sidebar.vue'
+/* eslint-disable camelcase */
 
 enum SearchErrorType {
   InvalidQuery,
@@ -65,18 +40,38 @@ enum SearchErrorType {
   NoResults,
   EmptyQuery,
 }
-interface SearchOk {
+enum WordErrorType {
+  Error,
+  EmptyQuery,
+}
+interface Ok<T> {
   t: 'ok';
-  inner: never[];
+  inner: T;
 }
-interface SearchError {
+interface Err<T> {
   t: 'err';
-  error: SearchErrorType;
+  error: T;
+}
+class Word {
+  word_id = 0 // dummy to satisfy Typescript
 }
 
-type SearchResult = SearchOk | SearchError;
+type Result<T, E> = Ok<T> | Err<E>;
+type SearchResult = Result<Word[], SearchErrorType>;
+type WordFetchResult = Result<never[], WordErrorType>;
 
-async function getResults (query: string, searchType: string): Promise<SearchResult> {
+async function getWordEntries (wordId: number): Promise<WordFetchResult> {
+  try {
+    const response = await fetch(`/api/word/${wordId}`)
+    const data = await response.json()
+    return { t: 'ok', inner: data }
+  } catch (error) {
+    console.error(error)
+  }
+  return { t: 'err', error: WordErrorType.Error }
+}
+
+async function getSearchResults (query: string, searchType: string): Promise<SearchResult> {
   try {
     if (query === '') {
       return { t: 'err', error: SearchErrorType.EmptyQuery }
@@ -99,22 +94,24 @@ async function getResults (query: string, searchType: string): Promise<SearchRes
 
 export default Vue.extend({
   components: {
-    WordEntryPreview,
     SearchForm,
-    SingleDictEntries
+    SingleDictEntries,
+    Sidebar
   },
   data: function () {
     return {
-      result: { t: 'err', error: SearchErrorType.EmptyQuery } as SearchResult,
-      wordEntries: null as any
+      results: { t: 'err', error: SearchErrorType.EmptyQuery } as SearchResult,
+      wordEntries: { t: 'err', error: WordErrorType.EmptyQuery } as WordFetchResult
     }
   },
   methods: {
     // called when SearchForm emits a update:query event
     updateQuery: async function (query: string, searchType: string /** todo */) {
-      this.result = await getResults(query, searchType)
-      if (this.result.t === 'ok') {
-        this.wordEntries = this.result.inner[0]
+      this.results = await getSearchResults(query, searchType)
+    },
+    updateWordEntry: async function (id: number) {
+      if (this.results.t === 'ok') {
+        this.wordEntries = await getWordEntries(id)
       }
     }
   }
@@ -162,13 +159,4 @@ body {
 .nav-item {
   padding-right: 0.5rem;
 }
-.info-container {
-  padding-top: 1rem;
-}
-.search-error {
-  font-weight: 500;
-  font-size: 1.5rem;
-  margin: 0.5rem 0;
-}
-
 </style>

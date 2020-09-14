@@ -87,23 +87,43 @@ pub(crate) async fn character_search(data: web::Data<AppData>, path: web::Path<S
     Ok(HttpResponse::Ok().json(db_results))
 }
 
-fn get_word_results(word_ids: Vec<i32>, connection: &DbConnection) -> Result<Vec<WordResult>, DieselError> {
-    let words = word::table.filter(word::word_id.eq_any(word_ids))
-        .load::<Word>(connection)?;
-    let entries = WordEntry::belonging_to(&words).load::<WordEntry>(connection)?;
+#[get("/word/{word_id}")]
+pub(crate) async fn single_word(data: web::Data<AppData>, path: web::Path<i32>) -> Result<HttpResponse, DictError> {
+    let conn = data.database_pool.clone();
+    let db_result = web::block(move || {
+        let connection = &conn.get_connection();
+
+        get_word_long_result(*path, connection)
+    }).await.map_err(|e| {
+        match e {
+            BlockingError::Canceled => DictError::Actix,
+            BlockingError::Error(e) => DictError::Database(e),
+        }
+    })?;
+    Ok(HttpResponse::Ok().json(db_result))
+}
+
+fn get_word_results(word_ids: Vec<i32>, connection: &DbConnection) -> Result<Vec<Word>, DieselError> {
+    word::table.filter(word::word_id.eq_any(word_ids))
+        .load::<Word>(connection)
+}
+
+
+fn get_word_long_result(word_id: i32, connection: &DbConnection) -> Result<WordResult, DieselError> {
+    let word = word::table.filter(word::word_id.eq(word_id))
+        .first::<Word>(connection)?;
+    let entries = WordEntry::belonging_to(&word).load::<WordEntry>(connection)?;
     let pronunciations = WordPronunciation::belonging_to(&entries).load::<WordPronunciation>(connection)?;
 
     let pronunciations_grouped = pronunciations.grouped_by(&entries);
-    let entries_full = entries.into_iter().zip(pronunciations_grouped).collect::<Vec<_>>().grouped_by(&words);
-    let words_full = words.into_iter().zip(entries_full).collect::<Vec<_>>();
+    let entries_full = entries.into_iter().zip(pronunciations_grouped).collect::<Vec<_>>();
 
-    let results: Vec<WordResult> = words_full.iter().map(|x| {
         let mut result = WordResult {
-            simplified: x.0.simplified.clone(),
-            traditional: x.0.traditional.clone(),
+            simplified: word.simplified.clone(),
+            traditional: word.traditional.clone(),
             entries: HashMap::new(),
         };
-        for entry in &x.1 {
+        for entry in &entries_full {
             let mut entry_result = EntryResult {
                 definitions: entry.0.definitions.clone(),
                 pronunciations: HashMap::new(),
@@ -119,8 +139,5 @@ fn get_word_results(word_ids: Vec<i32>, connection: &DbConnection) -> Result<Vec
                 .push(entry_result);
         }
 
-        result
-    }).collect();
-
-    Ok(results)
+    Ok(result)
 }

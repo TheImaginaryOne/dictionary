@@ -3,7 +3,7 @@ use database::ConnectionPool;
 use database::search::{DictSearch, load_search};
 use std::sync::Arc;
 
-use crate::controller::{pronunciation_search, character_search};
+use crate::controller::{single_word, pronunciation_search, character_search};
 
 mod error;
 mod controller;
@@ -29,6 +29,7 @@ fn main() {
         App::new().data(AppData { database_pool: database_pool.clone(), dict_search: ptr.clone() })
             .service(pronunciation_search)
             .service(character_search)
+            .service(single_word)
     }).bind(address).unwrap().run().unwrap();
 
     println!("Web service stopped");
