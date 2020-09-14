@@ -1,6 +1,6 @@
 <template>
-  <div class="word-entries">
-    <div class="word-entries-characters">{{ wordEntries.traditional }} ({{ wordEntries.simplified }})</div>
+  <div class="word-entry-preview">
+    <div class="word-entry-preview-characters">{{ wordEntries.traditional }} ({{ wordEntries.simplified }})</div>
 <!--    <SingleDictEntries v-for="(entries, dictId) in wordEntries.entries"
       :key="dictId"
       :dictionaryId="dictId"
@@ -24,12 +24,11 @@ export default Vue.extend({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
-.word-entries-characters {
-  font-size: 1.75rem;
-  padding-top: .75rem;
+.word-entry-preview-characters {
+  font-size: 1.5rem;
 }
-.word-entries {
+.word-entry-preview {
   border-bottom: 1px solid #bbb;
-  padding-bottom: 0.5rem;
+  padding: 0.5rem 0.5rem;
 }
 </style>

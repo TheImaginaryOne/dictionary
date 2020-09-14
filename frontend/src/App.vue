@@ -37,11 +37,17 @@
           </div>
         </div>
         <div v-if="result.t === 'ok'">
-          <WordEntries v-for="word in result.inner" :key="word.id" :word-entries="word"/>
+          <WordEntryPreview v-for="word in result.inner" :key="word.id" :word-entries="word"/>
         </div>
       </div>
-      <div class = "main-entry">
-        TODO
+      <div class="main-entries">
+        <div v-if="wordEntries !== null">
+          <div class="word-entries-characters">{{ wordEntries.traditional }} ({{ wordEntries.simplified }})</div>
+          <SingleDictEntries v-for="(entries, dictId) in wordEntries.entries"
+            :key="dictId"
+            :dictionaryId="dictId"
+            :entries="entries"/>
+        </div>
       </div>
     </div>
   </div>
@@ -50,7 +56,9 @@
 <script lang="ts">
 import Vue from 'vue'
 import SearchForm from './components/SearchForm.vue'
-import WordEntries from './components/WordEntries.vue'
+import WordEntryPreview from './components/WordEntryPreview.vue'
+import SingleDictEntries from './components/SingleDictEntries.vue'
+
 enum SearchErrorType {
   InvalidQuery,
   NetworkError,
@@ -91,18 +99,23 @@ async function getResults (query: string, searchType: string): Promise<SearchRes
 
 export default Vue.extend({
   components: {
-    WordEntries,
-    SearchForm
+    WordEntryPreview,
+    SearchForm,
+    SingleDictEntries
   },
   data: function () {
     return {
-      result: { t: 'err', error: SearchErrorType.EmptyQuery } as SearchResult
+      result: { t: 'err', error: SearchErrorType.EmptyQuery } as SearchResult,
+      wordEntries: null as any
     }
   },
   methods: {
     // called when SearchForm emits a update:query event
     updateQuery: async function (query: string, searchType: string /** todo */) {
       this.result = await getResults(query, searchType)
+      if (this.result.t === 'ok') {
+        this.wordEntries = this.result.inner[0]
+      }
     }
   }
 })
@@ -116,12 +129,24 @@ export default Vue.extend({
   max-width: 1200px;
   margin: 0 auto;
   line-height: 1.5;
+  display: flex;
 }
 body {
   margin: 0;
 }
 .header-container {
   background-color: #6f8996;
+}
+.sidebar {
+  flex-basis: 300px;
+  padding-right: 16px;
+}
+.main-entries {
+
+}
+.word-entries-characters {
+  font-size: 1.75rem;
+  padding-top: .75rem;
 }
 .header {
   display: flex;
@@ -145,4 +170,5 @@ body {
   font-size: 1.5rem;
   margin: 0.5rem 0;
 }
+
 </style>
